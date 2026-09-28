@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Alpha Tech — Gestão inteligente de manutenção, recursos, planos de ação, GUT e indicadores.">
+<title>Alpha Tech — Gestão de Manutenção</title>
+<style>
+:root{
+  --bg:#f4f7fb;--surface:#fff;--surface2:#eef3f8;--text:#142033;--muted:#64748b;
+  --primary:#155eef;--primary2:#0b4acb;--accent:#00b8a9;--danger:#e5484d;--warning:#f59e0b;
+  --success:#16a34a;--border:#dbe3ee;--shadow:0 12px 30px rgba(25,45,75,.08);--radius:18px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);font-size:16px}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid #80b7ff;outline-offset:2px}
+.app{display:flex;min-height:100vh}
+.sidebar{width:270px;background:#0e1b2d;color:#e9f0fa;position:fixed;inset:0 auto 0 0;z-index:20;padding:20px 15px;display:flex;flex-direction:column}
+.brand{display:flex;align-items:center;gap:12px;padding:8px 10px 22px}
+.logo{width:44px;height:44px;border-radius:13px;background:linear-gradient(135deg,#1d75ff,#00c6b5);display:grid;place-items:center;font-weight:900;color:#fff;box-shadow:0 8px 22px rgba(21,94,239,.3)}
+.brand strong{font-size:20px;letter-spacing:-.5px}.brand small{display:block;color:#9eb0c8;margin-top:2px}
+.nav{display:grid;gap:5px}.nav button{border:0;background:transparent;color:#b9c7d8;text-align:left;padding:12px 13px;border-radius:12px;display:flex;align-items:center;gap:12px;font-weight:650}
+.nav button:hover,.nav button.active{background:#1a2c45;color:#fff}.nav .icon{width:24px;text-align:center}
+.side-bottom{margin-top:auto;padding:10px}.status{background:#15283f;border:1px solid #29405d;border-radius:14px;padding:12px;color:#c8d5e5;font-size:13px}
+.main{margin-left:270px;width:calc(100% - 270px);min-width:0}
+.topbar{height:76px;background:rgba(255,255,255,.88);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:10}
+.topbar h1{font-size:20px;margin:0}.top-actions{display:flex;gap:9px;align-items:center}
+.icon-btn,.btn{border:1px solid var(--border);background:#fff;color:var(--text);border-radius:11px;padding:9px 13px;font-weight:700}
+.icon-btn{width:40px;height:40px;padding:0}.btn.primary{background:var(--primary);color:#fff;border-color:var(--primary)}.btn.primary:hover{background:var(--primary2)}
+.btn.ghost{background:var(--surface2)}.btn.danger{background:#fff0f0;color:#b4232a;border-color:#ffd0d0}.btn.success{background:#eaf8ef;color:#087b2e;border-color:#bfe8ca}
+.content{padding:28px;max-width:1500px;margin:auto}
+.view{display:none}.view.active{display:block}
+.hero{background:linear-gradient(125deg,#10233d 0%,#174f9c 58%,#00a99b 100%);color:#fff;border-radius:24px;padding:30px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;width:300px;height:300px;border-radius:50%;right:-80px;top:-130px;background:rgba(255,255,255,.09)}
+.hero h2{margin:0 0 8px;font-size:31px;letter-spacing:-1px}.hero p{margin:0;color:#dceaff;max-width:700px}
+.hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}.hero .btn{border-color:rgba(255,255,255,.25)}.hero .btn.primary{background:#fff;color:#124d9e}
+.grid{display:grid;gap:16px}.stats{grid-template-columns:repeat(4,minmax(0,1fr));margin:20px 0}.cards{grid-template-columns:repeat(3,minmax(0,1fr));margin-top:20px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:19px;box-shadow:var(--shadow)}
+.stat{display:flex;justify-content:space-between;align-items:flex-start}.stat .value{font-size:29px;font-weight:850;margin-top:5px}.label{color:var(--muted);font-size:13px;font-weight:700}.stat-icon{width:42px;height:42px;border-radius:12px;background:#edf4ff;display:grid;place-items:center;color:var(--primary);font-size:19px}
+.section-head{display:flex;align-items:center;justify-content:space-between;gap:15px;margin:26px 0 13px}.section-head h2{font-size:20px;margin:0}.muted{color:var(--muted)}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 15px}.search{flex:1;min-width:210px}
+input,select,textarea{width:100%;border:1px solid var(--border);background:#fff;border-radius:11px;padding:10px 12px;color:var(--text)}
+textarea{min-height:95px;resize:vertical}.field{display:grid;gap:6px}.field label{font-size:13px;font-weight:750;color:#334155}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.form-grid .full{grid-column:1/-1}
+.table-wrap{overflow:auto;background:#fff;border:1px solid var(--border);border-radius:15px}.table{width:100%;border-collapse:collapse;min-width:700px}.table th,.table td{padding:12px 14px;border-bottom:1px solid #edf1f5;text-align:left}.table th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:#64748b;background:#f8fafc}.table tr:last-child td{border-bottom:0}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:999px;font-size:12px;font-weight:800}.low{background:#edf8ef;color:#16743a}.medium{background:#fff7df;color:#9a6700}.high{background:#fff0e6;color:#b54708}.critical{background:#ffe8e8;color:#b4232a}.blue{background:#eaf2ff;color:#175cd3}
+.actions{display:flex;gap:6px;flex-wrap:wrap}.small{font-size:12px;padding:7px 9px}
+.modal{position:fixed;inset:0;background:rgba(8,20,35,.58);display:none;align-items:center;justify-content:center;padding:18px;z-index:100}.modal.open{display:flex}.modal-box{background:#fff;border-radius:20px;width:min(760px,100%);max-height:90vh;overflow:auto;box-shadow:0 30px 80px rgba(0,0,0,.25)}.modal-head{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid var(--border)}.modal-head h3{margin:0}.modal-body{padding:20px}.modal-foot{padding:15px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+.gut{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.gut input{text-align:center;font-size:20px;font-weight:800}.score{padding:18px;border-radius:14px;background:#f7f9fc;border:1px solid var(--border);text-align:center}.score strong{display:block;font-size:32px}
+.kanban{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.column{background:#eef3f8;border-radius:15px;padding:12px;min-height:220px}.column h3{font-size:14px;margin:4px 5px 12px}.task{background:#fff;border:1px solid var(--border);padding:12px;border-radius:12px;margin-bottom:9px;box-shadow:0 3px 10px rgba(0,0,0,.04)}
+.progress{height:9px;background:#e6ebf2;border-radius:99px;overflow:hidden}.progress span{height:100%;display:block;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:99px}
+.photo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.photo{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:#fff}.photo img{width:100%;height:140px;object-fit:cover;display:block}.photo figcaption{padding:9px;font-size:12px}
+.chart{height:240px;display:flex;align-items:flex-end;gap:12px;padding:15px 5px 5px}.bar{flex:1;min-width:18px;background:linear-gradient(180deg,#1769ee,#00ae9f);border-radius:8px 8px 2px 2px;position:relative}.bar span{position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-size:11px;color:var(--muted)}.bar em{position:absolute;top:-19px;left:50%;transform:translateX(-50%);font-style:normal;font-size:11px;font-weight:800}
+.empty{padding:35px;text-align:center;color:var(--muted)}.note{padding:12px 14px;border-left:4px solid var(--primary);background:#edf4ff;border-radius:9px;color:#29486f}
+.mobile-nav{display:none}
+.toast{position:fixed;right:20px;bottom:20px;background:#10233d;color:#fff;padding:13px 17px;border-radius:12px;box-shadow:var(--shadow);z-index:200;display:none}.toast.show{display:block}
+.skip{position:fixed;left:10px;top:10px;transform:translateY(-150%);z-index:300;background:#fff;padding:10px;border-radius:8px}.skip:focus{transform:none}
+@media(max-width:1050px){.stats{grid-template-columns:repeat(2,1fr)}.cards{grid-template-columns:1fr 1fr}.photo-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:800px){
+ .sidebar{display:none}.main{margin-left:0;width:100%;padding-bottom:68px}.topbar{padding:0 15px}.content{padding:18px}.topbar h1{font-size:17px}.mobile-nav{position:fixed;display:flex;bottom:0;left:0;right:0;height:64px;background:#fff;border-top:1px solid var(--border);z-index:30;justify-content:space-around}.mobile-nav button{border:0;background:transparent;font-size:11px;color:var(--muted);display:grid;place-items:center;gap:2px}.mobile-nav button.active{color:var(--primary);font-weight:800}.stats,.cards,.kanban{grid-template-columns:1fr}.photo-grid{grid-template-columns:repeat(2,1fr)}.form-grid{grid-template-columns:1fr}.form-grid .full{grid-column:auto}.hero h2{font-size:25px}.top-actions .hide-mobile{display:none}
+}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+.high-contrast{--bg:#fff;--surface:#fff;--text:#000;--muted:#222;--border:#555}.high-contrast .sidebar{background:#000}.large-text{font-size:19px}.large-text .label,.large-text .field label{font-size:15px}
+
+/* ===== ALPHA TECH 2.0 — identidade visual, onboarding e acessibilidade ===== */
+:root{
+  --primary:#155eef;--primary2:#0b4acb;--accent:#00b8a9;
+  --ink:#142033;--soft:#64748b;--line:#dbe3ee;
+  --glow:0 18px 50px rgba(21,94,239,.16);
+}
+.auth-screen{position:fixed;inset:0;z-index:1000;background:
+ radial-gradient(circle at 15% 20%,rgba(0,184,169,.20),transparent 32%),
+ radial-gradient(circle at 85% 15%,rgba(21,94,239,.28),transparent 35%),
+ linear-gradient(135deg,#071321,#10233d 58%,#0b5a65);display:flex;align-items:center;justify-content:center;padding:22px;overflow:auto}
+.auth-shell{width:min(1080px,100%);display:grid;grid-template-columns:1.05fr .95fr;background:rgba(255,255,255,.97);border-radius:30px;overflow:hidden;box-shadow:0 40px 100px rgba(0,0,0,.30)}
+.auth-brand{padding:48px;color:#fff;display:flex;flex-direction:column;justify-content:center;background:linear-gradient(145deg,#0d2340,#155eef 65%,#00a99b);position:relative}
+.auth-brand:before,.auth-brand:after{content:"";position:absolute;border:1px solid rgba(255,255,255,.15);border-radius:50%}
+.auth-brand:before{width:360px;height:360px;right:-180px;top:-110px}.auth-brand:after{width:250px;height:250px;left:-130px;bottom:-110px}
+.auth-logo{width:68px;height:68px;border-radius:20px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);display:grid;place-items:center;font-size:30px;font-weight:950;margin-bottom:25px}
+.auth-brand h1{font-size:42px;line-height:1;margin:0 0 15px;letter-spacing:-1.8px}.auth-brand p{color:#dceaff;line-height:1.65;max-width:480px}.feature-list{display:grid;gap:10px;margin-top:25px}.feature-list div{display:flex;gap:10px;align-items:center;color:#eef6ff}
+.auth-form{padding:42px}.auth-form h2{margin:0;font-size:28px}.auth-form>p{color:var(--soft);margin-top:7px}.auth-tabs{display:flex;background:#eef3f8;border-radius:12px;padding:4px;margin:20px 0}.auth-tabs button{flex:1;border:0;background:transparent;padding:10px;border-radius:9px;font-weight:800;color:#64748b}.auth-tabs button.active{background:#fff;color:var(--primary);box-shadow:0 3px 10px rgba(0,0,0,.06)}
+.auth-error{display:none;background:#fff0f0;color:#b4232a;border:1px solid #ffd0d0;border-radius:10px;padding:10px;margin:12px 0;font-size:13px}.auth-error.show{display:block}
+.password-wrap{position:relative}.password-wrap input{padding-right:46px}.password-wrap button{position:absolute;right:5px;top:5px;width:35px;height:35px;border:0;background:transparent}
+.profile-chip{display:flex;align-items:center;gap:8px;padding:6px 9px;background:#f0f5fb;border:1px solid var(--line);border-radius:999px;font-size:13px;font-weight:800}.avatar{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#155eef,#00b8a9);color:#fff;font-size:11px}
+.help-fab{position:fixed;right:24px;bottom:24px;z-index:25;width:56px;height:56px;border-radius:50%;border:0;background:linear-gradient(135deg,#155eef,#00b8a9);color:#fff;font-size:22px;box-shadow:0 12px 30px rgba(21,94,239,.35)}
+.help-fab:hover{transform:translateY(-2px)}
+.help-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}.help-card{border:1px solid var(--line);border-radius:16px;padding:18px;background:#fff;transition:.2s}.help-card:hover{transform:translateY(-2px);box-shadow:var(--glow)}.help-card .help-icon{font-size:26px;margin-bottom:10px}
+.faq{border:1px solid var(--line);border-radius:13px;margin-bottom:9px;overflow:hidden;background:#fff}.faq button{width:100%;border:0;background:#fff;text-align:left;padding:15px;font-weight:800;display:flex;justify-content:space-between}.faq .answer{display:none;padding:0 15px 15px;color:var(--soft);line-height:1.55}.faq.open .answer{display:block}
+.tour-tip{background:linear-gradient(135deg,#edf4ff,#e9fbf8);border:1px solid #cfe2ff;border-radius:15px;padding:15px;margin-bottom:15px}
+.report-card{border:1px dashed #aabbd0;border-radius:14px;padding:18px;background:#fbfdff}
+@media(max-width:800px){.auth-shell{grid-template-columns:1fr}.auth-brand{display:none}.auth-form{padding:28px 20px}.help-grid{grid-template-columns:1fr}.help-fab{right:15px;bottom:80px}}
+
+</style>
+</head>
+<body>
+
+<div class="auth-screen" id="authScreen" aria-labelledby="authTitle">
+ <div class="auth-shell">
+  <div class="auth-brand">
+   <div class="auth-logo">A</div>
+   <h1 id="authTitle">Alpha Tech</h1>
+   <p>Uma plataforma de gestão de manutenção pensada para transformar ocorrências em ações, prioridades e informação para o PCM.</p>
+   <div class="feature-list">
+    <div>✓ Gestão de pessoas e equipamentos</div><div>✓ 5W2H + priorização GUT</div><div>✓ QR Code e evidências fotográficas</div><div>✓ Indicadores e saída de informação</div>
+   </div>
+  </div>
+  <div class="auth-form">
+   <h2 id="authHeading">Crie seu acesso</h2><p id="authSub">Faça seu cadastro inicial para entrar no ambiente.</p>
+   <div class="auth-tabs"><button id="tabRegister" class="active" onclick="setAuthMode('register')">Primeiro acesso</button><button id="tabLogin" onclick="setAuthMode('login')">Entrar</button></div>
+   <div id="authError" class="auth-error" role="alert"></div>
+   <div id="registerForm">
+    <div class="form-grid">
+     <div class="field full"><label for="regName">Nome completo</label><input id="regName" autocomplete="name" placeholder="Como você quer ser identificado?"></div>
+     <div class="field"><label for="regEmail">E-mail</label><input id="regEmail" type="email" autocomplete="email" placeholder="voce@empresa.com"></div>
+     <div class="field"><label for="regRole">Cargo / função</label><input id="regRole" placeholder="Ex.: Aprendiz de manutenção"></div>
+     <div class="field"><label for="regCompany">Empresa / projeto</label><input id="regCompany" placeholder="Nome da empresa"></div>
+     <div class="field"><label for="regPassword">Senha</label><div class="password-wrap"><input id="regPassword" type="password" autocomplete="new-password" placeholder="Mínimo de 6 caracteres"><button type="button" onclick="togglePassword('regPassword',this)" aria-label="Mostrar senha">◉</button></div></div>
+    </div>
+    <label style="display:flex;gap:8px;margin-top:14px;font-size:13px;color:#475569"><input id="regTerms" type="checkbox" style="width:auto"> Concordo em usar o Alpha Tech nesta demonstração.</label>
+    <button class="btn primary" style="width:100%;margin-top:17px;padding:13px" onclick="registerUser()">Criar acesso e entrar →</button>
+   </div>
+   <div id="loginForm" style="display:none">
+    <div class="field"><label for="loginEmail">E-mail</label><input id="loginEmail" type="email" autocomplete="email"></div>
+    <div class="field" style="margin-top:12px"><label for="loginPassword">Senha</label><div class="password-wrap"><input id="loginPassword" type="password" autocomplete="current-password"><button type="button" onclick="togglePassword('loginPassword',this)" aria-label="Mostrar senha">◉</button></div></div>
+    <button class="btn primary" style="width:100%;margin-top:17px;padding:13px" onclick="loginUser()">Entrar no Alpha Tech →</button>
+    <button class="btn" style="width:100%;margin-top:9px" onclick="setAuthMode('register')">Criar primeiro acesso</button>
+   </div>
+   <p style="font-size:12px;color:#64748b;margin-top:18px">Protótipo demonstrativo: nesta versão, o cadastro é armazenado localmente no navegador.</p>
+  </div>
+ </div>
+</div>
+
+<a class="skip" href="#mainContent">Pular para o conteúdo principal</a>
+<div class="app">
+<aside class="sidebar" aria-label="Menu principal">
+  <div class="brand"><div class="logo" aria-hidden="true">A</div><div><strong>Alpha Tech</strong><small>PCM • Manutenção</small></div></div>
+  <nav class="nav">
+    <button data-view="dashboard" class="active"><span class="icon">⌂</span>Visão geral</button>
+    <button data-view="people"><span class="icon">♙</span>Pessoas</button>
+    <button data-view="equipment"><span class="icon">⚙</span>Equipamentos</button>
+    <button data-view="plans"><span class="icon">✓</span>Planos de ação</button>
+    <button data-view="gut"><span class="icon">◈</span>Priorização GUT</button>
+    <button data-view="plants"><span class="icon">▣</span>Plantas & fotos</button>
+    <button data-view="statistics"><span class="icon">▥</span>Estatísticas</button>
+    <button data-view="reports"><span class="icon">⇩</span>Relatórios</button>
+    <button data-view="help"><span class="icon">?</span>Ajuda</button>
+    <button data-view="settings"><span class="icon">⚑</span>Acessibilidade</button>
+  </nav>
+  <div class="side-bottom"><div class="status">● Alpha Tech 2.0<br><span>Ambiente local demonstrativo.</span></div></div>
+</aside>
+
+<main class="main" id="mainContent">
+<header class="topbar">
+  <h1 id="pageTitle">Visão geral</h1>
+  <div class="top-actions">
+    <button class="profile-chip" id="profileChip" title="Abrir meu perfil" onclick="openProfileEditor()" style="cursor:pointer"><span class="avatar" id="profileAvatar">AT</span><span id="profileName">Usuário</span></button>
+    <button class="icon-btn" title="Ativar modo alto contraste" aria-label="Ativar modo alto contraste" onclick="toggleContrast()">◐</button>
+    <button class="btn ghost hide-mobile" onclick="openQR()">▣ Escanear QR</button>
+    <button class="btn primary" onclick="quickPlan()">+ Nova ação</button>
+  </div>
+</header>
+
+<div class="content">
+<section id="dashboard" class="view active">
+  <div class="hero">
+    <h2>Manutenção com visão de futuro.</h2>
+    <p>O Alpha Tech centraliza recursos, equipamentos, pessoas, planos 5W2H, priorização GUT, evidências e indicadores para apoiar o PCM.</p>
+    <div class="hero-actions"><button class="btn primary" onclick="quickPlan()">Criar plano 5W2H</button><button class="btn ghost" onclick="openQR()">Escanear equipamento</button></div>
+  </div>
+  <div class="grid stats">
+    <div class="card stat"><div><div class="label">Equipamentos</div><div class="value" id="statEquip">0</div></div><div class="stat-icon">⚙</div></div>
+    <div class="card stat"><div><div class="label">Ações abertas</div><div class="value" id="statOpen">0</div></div><div class="stat-icon">✓</div></div>
+    <div class="card stat"><div><div class="label">Alta prioridade</div><div class="value" id="statHigh">0</div></div><div class="stat-icon">!</div></div>
+    <div class="card stat"><div><div class="label">Pessoas cadastradas</div><div class="value" id="statPeople">0</div></div><div class="stat-icon">♙</div></div>
+  </div>
+  <div class="grid cards">
+    <div class="card"><div class="section-head"><h2>Ações recentes</h2><button class="btn small ghost" onclick="showView('plans')">Ver todas</button></div><div id="recentActions"></div></div>
+    <div class="card"><div class="section-head"><h2>Status das ações</h2></div><div id="miniChart" class="chart" aria-label="Gráfico de ações"></div></div>
+    <div class="card"><div class="section-head"><h2>Fluxo recomendado</h2></div><div class="note">1. Cadastre os recursos → 2. registre a ocorrência → 3. crie o 5W2H → 4. avalie GUT → 5. execute → 6. anexe evidência → 7. acompanhe os indicadores.</div></div>
+  </div>
+</section>
+
+<section id="people" class="view">
+  <div class="section-head"><div><h2>Cadastro de pessoas</h2><p class="muted">Equipe, responsáveis, executores e contatos.</p></div><button class="btn primary" onclick="openPerson()">+ Pessoa</button></div>
+  <div class="toolbar"><input id="peopleSearch" class="search" placeholder="Buscar por nome, função ou setor..." oninput="renderPeople()"></div>
+  <div class="table-wrap"><table class="table"><thead><tr><th>Nome</th><th>Função</th><th>Setor</th><th>Contato</th><th>Ações</th></tr></thead><tbody id="peopleTable"></tbody></table></div>
+</section>
+
+<section id="equipment" class="view">
+  <div class="section-head"><div><h2>Equipamentos & máquinas</h2><p class="muted">Inventário, localização, estado e identificação por QR Code.</p></div><button class="btn primary" onclick="openEquipment()">+ Equipamento</button></div>
+  <div class="toolbar"><input id="equipSearch" class="search" placeholder="Buscar equipamento, patrimônio ou setor..." oninput="renderEquipment()"><button class="btn ghost" onclick="openQR()">▣ Ler QR</button></div>
+  <div class="table-wrap"><table class="table"><thead><tr><th>Equipamento</th><th>Patrimônio</th><th>Setor</th><th>Estado</th><th>Responsável</th><th>Ações</th></tr></thead><tbody id="equipmentTable"></tbody></table></div>
+</section>
+
+<section id="plans" class="view">
+  <div class="section-head"><div><h2>Planos de ação — 5W2H</h2><p class="muted">Transforme ocorrências em ações claras, responsáveis e mensuráveis.</p></div><button class="btn primary" onclick="openPlan()">+ Novo plano</button></div>
+  <div class="toolbar"><input id="planSearch" class="search" placeholder="Buscar ação, equipamento ou responsável..." oninput="renderPlans()"><select id="planFilter" onchange="renderPlans()"><option value="">Todos os status</option><option>Planejada</option><option>Em andamento</option><option>Concluída</option><option>Bloqueada</option></select></div>
+  <div class="kanban" id="kanban"></div>
+</section>
+
+<section id="gut" class="view">
+  <div class="section-head"><div><h2>Priorização GUT</h2><p class="muted">Gravidade × Urgência × Tendência. Use a pontuação para ordenar o atendimento.</p></div></div>
+  <div class="grid cards">
+    <div class="card"><h3>Escala GUT</h3><p class="muted">1 = baixa influência · 5 = influência máxima.</p><div class="gut"><div><label class="label">Gravidade</label><input id="g" type="number" min="1" max="5" value="3" oninput="calcGUT()"></div><div><label class="label">Urgência</label><input id="u" type="number" min="1" max="5" value="3" oninput="calcGUT()"></div><div><label class="label">Tendência</label><input id="t" type="number" min="1" max="5" value="3" oninput="calcGUT()"></div></div><div class="score" style="margin-top:15px">Pontuação<strong id="gutScore">27</strong><span id="gutLevel" class="badge medium">Média</span></div></div>
+    <div class="card"><h3>Critério de leitura</h3><p><span class="badge low">1–20</span> Baixa prioridade</p><p><span class="badge medium">21–50</span> Média prioridade</p><p><span class="badge high">51–80</span> Alta prioridade</p><p><span class="badge critical">81–125</span> Crítica</p><p class="muted">A escala pode ser adaptada ao padrão da empresa.</p></div>
+  </div>
+  <div class="section-head"><h2>Ranking das ações</h2></div><div class="table-wrap"><table class="table"><thead><tr><th>Ação</th><th>G</th><th>U</th><th>T</th><th>GUT</th><th>Prioridade</th></tr></thead><tbody id="gutTable"></tbody></table></div>
+</section>
+
+<section id="plants" class="view">
+  <div class="section-head"><div><h2>Plantas, locais & evidências</h2><p class="muted">Registre locais, fotos antes/depois e evidências de execução.</p></div><button class="btn primary" onclick="document.getElementById('photoInput').click()">+ Adicionar fotos</button></div>
+  <input id="photoInput" type="file" accept="image/*" multiple hidden onchange="addPhotos(event)">
+  <div class="card"><div class="section-head"><h2>Mapa/Planta do projeto</h2><button class="btn small ghost" onclick="document.getElementById('plantInput').click()">Enviar planta</button></div><input id="plantInput" type="file" accept="image/*" hidden onchange="showPlant(event)"><div id="plantArea" class="empty">Nenhuma planta adicionada. Você pode enviar uma imagem da planta/layout do espaço.</div></div>
+  <div class="section-head"><h2>Evidências fotográficas</h2></div><div id="photoGrid" class="photo-grid"></div>
+</section>
+
+<section id="statistics" class="view">
+  <div class="section-head"><div><h2>Estatísticas & indicadores</h2><p class="muted">Indicadores para apoiar decisões do PCM.</p></div><button class="btn ghost" onclick="exportData()">Exportar dados</button></div>
+  <div class="grid cards">
+    <div class="card"><h3>Ações por status</h3><div id="statusChart" class="chart"></div></div>
+    <div class="card"><h3>Prioridade</h3><div id="priorityChart" class="chart"></div></div>
+    <div class="card"><h3>Indicadores</h3><div id="kpiList"></div></div>
+  </div>
+  <div class="card" style="margin-top:16px"><h3>Visão operacional</h3><div class="grid stats" style="margin:15px 0 0"><div><span class="label">Tempo médio informado</span><div class="value" id="avgTime">0 h</div></div><div><span class="label">Custo estimado total</span><div class="value" id="totalCost">R$ 0</div></div><div><span class="label">Conclusão</span><div class="value" id="completion">0%</div></div><div><span class="label">Evidências</span><div class="value" id="evidenceCount">0</div></div></div></div>
+</section>
+
+
+<section id="reports" class="view">
+  <div class="section-head">
+    <div><h2>Relatórios & saída de informação</h2><p class="muted">Transforme os dados do Alpha Tech em informação pronta para análise do PCM.</p></div>
+  </div>
+  <div class="tour-tip"><strong>Saída de informação:</strong> use os filtros e exporte um backup completo ou um relatório operacional em CSV para planilhas.</div>
+  <div class="grid cards">
+    <div class="card report-card"><h3>📊 Relatório de ações</h3><p class="muted">Lista de planos, responsáveis, prazos, status, GUT e custos.</p><button class="btn primary" onclick="exportPlansCSV()">Exportar ações CSV</button></div>
+    <div class="card report-card"><h3>⚙️ Inventário</h3><p class="muted">Equipamentos, patrimônio, setor, estado e responsável.</p><button class="btn primary" onclick="exportEquipmentCSV()">Exportar equipamentos CSV</button></div>
+    <div class="card report-card"><h3>💾 Backup completo</h3><p class="muted">Inclui pessoas, equipamentos, planos, fotos e configurações armazenadas.</p><button class="btn primary" onclick="exportData()">Baixar JSON</button></div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <h3>Resumo executivo</h3>
+    <div id="executiveSummary" class="note">Gerando resumo…</div>
+  </div>
+</section>
+
+<section id="help" class="view">
+  <div class="section-head">
+    <div><h2>Central de ajuda Alpha Tech</h2><p class="muted">Um ponto único para aprender, pesquisar e pedir suporte.</p></div>
+    <button class="btn primary" onclick="openSupport()">✉ Pedir ajuda</button>
+  </div>
+  <div class="help-grid">
+    <div class="help-card"><div class="help-icon">🚀</div><h3>Primeiros passos</h3><p class="muted">Cadastre sua equipe e seus equipamentos. Depois registre as ações de manutenção.</p><button class="btn small" onclick="startTour()">Iniciar tour</button></div>
+    <div class="help-card"><div class="help-icon">🧭</div><h3>5W2H</h3><p class="muted">Defina o quê, por quê, onde, quando, quem, como e quanto custa.</p><button class="btn small" onclick="openPlan()">Criar meu primeiro plano</button></div>
+    <div class="help-card"><div class="help-icon">🎯</div><h3>GUT</h3><p class="muted">Pontue Gravidade, Urgência e Tendência para organizar a prioridade.</p><button class="btn small" onclick="showView('gut')">Abrir GUT</button></div>
+    <div class="help-card"><div class="help-icon">📷</div><h3>QR Code</h3><p class="muted">Leia a identificação do equipamento com a câmera ou informe o código manualmente.</p><button class="btn small" onclick="openQR()">Abrir leitor</button></div>
+    <div class="help-card"><div class="help-icon">📸</div><h3>Evidências</h3><p class="muted">Anexe fotos antes/depois para comprovar a execução da ação.</p><button class="btn small" onclick="showView('plants')">Enviar evidência</button></div>
+    <div class="help-card"><div class="help-icon">📈</div><h3>Indicadores</h3><p class="muted">Acompanhe custos, tempo, conclusão, evidências e ações por prioridade.</p><button class="btn small" onclick="showView('statistics')">Ver indicadores</button></div>
+  </div>
+  <div class="section-head"><h2>Perguntas frequentes</h2></div>
+  <div id="faqList">
+    <div class="faq"><button onclick="toggleFAQ(this)">O que é o PCM? <span>＋</span></button><div class="answer">PCM significa Planejamento e Controle da Manutenção. O Alpha Tech foi pensado para apoiar o planejamento, organização, execução e acompanhamento das atividades de manutenção.</div></div>
+    <div class="faq"><button onclick="toggleFAQ(this)">Como funciona o 5W2H? <span>＋</span></button><div class="answer">O plano registra What, Why, Where, When, Who, How e How Much — respectivamente o que, por quê, onde, quando, quem, como e quanto custa.</div></div>
+    <div class="faq"><button onclick="toggleFAQ(this)">Como calculo a GUT? <span>＋</span></button><div class="answer">A pontuação é Gravidade × Urgência × Tendência. Cada fator recebe uma nota de 1 a 5. Quanto maior o resultado, maior a prioridade operacional sugerida pelo método.</div></div>
+    <div class="faq"><button onclick="toggleFAQ(this)">Meus dados ficam onde? <span>＋</span></button><div class="answer">Nesta versão demonstrativa, os dados ficam no armazenamento local do navegador. O botão de backup permite exportar um arquivo JSON para restauração.</div></div>
+    <div class="faq"><button onclick="toggleFAQ(this)">O QR Code precisa de internet? <span>＋</span></button><div class="answer">A câmera depende das permissões do navegador. O leitor utiliza uma biblioteca QR carregada no navegador para reconhecer o código e localizar o equipamento cadastrado.</div></div>
+  </div>
+</section>
+
+<section id="settings" class="view">
+  <div class="section-head"><div><h2>Acessibilidade & configurações</h2><p class="muted">Personalize a experiência para diferentes necessidades.</p></div></div>
+  <div class="grid cards">
+    <div class="card"><h3>👤 Meu perfil</h3><p class="muted">Personalize seu nome, função e empresa.</p><button class="btn primary" onclick="openProfileEditor()">Editar perfil</button><button class="btn danger" style="margin-left:7px" onclick="logout()">Sair</button></div>
+    <div class="card"><h3>Leitura e visual</h3><p><button class="btn" onclick="toggleLarge()">Aumentar texto</button></p><p><button class="btn" onclick="toggleContrast()">Alto contraste</button></p><p class="muted">O layout usa foco visível, navegação por teclado, contraste e suporte a redução de movimento.</p></div>
+    <div class="card"><h3>Dados</h3><p><button class="btn" onclick="exportData()">Baixar backup JSON</button></p><p><button class="btn" onclick="document.getElementById('importInput').click()">Restaurar backup JSON</button></p><input id="importInput" type="file" accept=".json,application/json" hidden onchange="importData(event)"><p><button class="btn danger" onclick="clearData()">Apagar dados locais</button></p></div>
+    <div class="card"><h3>QR Code</h3><p class="muted">Use a câmera para identificar equipamentos rapidamente. Em navegadores sem suporte nativo, o sistema orienta alternativas.</p><button class="btn primary" onclick="openQR()">Abrir leitor</button></div>
+  </div>
+</section>
+</div>
+</main>
+<nav class="mobile-nav" aria-label="Navegação móvel">
+ <button data-view="dashboard" class="active">⌂<span>Início</span></button><button data-view="people">♙<span>Pessoas</span></button><button data-view="equipment">⚙<span>Equip.</span></button><button data-view="plans">✓<span>Ações</span></button><button data-view="statistics">▥<span>Dados</span></button>
+</nav>
+</div>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+ <div class="modal-box"><div class="modal-head"><h3 id="modalTitle">Novo</h3><button class="icon-btn" onclick="closeModal()" aria-label="Fechar">×</button></div><div class="modal-body" id="modalBody"></div><div class="modal-foot" id="modalFoot"></div></div>
+</div>
+<div class="modal" id="qrModal" role="dialog" aria-modal="true" aria-labelledby="qrTitle">
+ <div class="modal-box">
+  <div class="modal-head">
+   <h3 id="qrTitle">Leitor de QR Code</h3>
+   <button class="icon-btn" onclick="closeQR()" aria-label="Fechar">×</button>
+  </div>
+  <div class="modal-body">
+   <div class="note"><strong>Identificação inteligente:</strong> aponte a câmera para o QR Code de uma máquina. O Alpha Tech tenta localizar automaticamente o patrimônio cadastrado.</div>
+   <video id="qrVideo" style="width:100%;margin-top:15px;border-radius:14px;background:#081525;min-height:230px" playsinline muted></video>
+   <canvas id="qrCanvas" hidden></canvas>
+   <p id="qrStatus" class="muted" aria-live="polite">Preparando leitor…</p>
+   <div class="field"><label for="qrManual">Busca manual</label><input id="qrManual" placeholder="Ex.: PAT-001"></div>
+   <div class="actions" style="margin-top:10px">
+    <button class="btn primary" onclick="handleQR(document.getElementById('qrManual').value)">Buscar equipamento</button>
+    <button class="btn" onclick="startQR()">Tentar câmera novamente</button>
+   </div>
+  </div>
+ </div>
+</div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script>
+const KEY="alphaTechDataV1";
+let data=JSON.parse(localStorage.getItem(KEY)||"null")||{
+ people:[
+  {id:1,name:"Ana Paula Silva",role:"Técnica de manutenção",sector:"PCM",contact:"(31) 99999-0000"},
+  {id:2,name:"Lucas Mendes",role:"Mecânico",sector:"Produção",contact:"(31) 98888-0000"}
+ ],
+ equipment:[
+  {id:1,name:"Prensa Hidráulica P-01",asset:"PAT-001",sector:"Usinagem",state:"Manutenção",responsible:"Ana Paula Silva",qr:"PAT-001"},
+  {id:2,name:"Torno CNC T-04",asset:"PAT-004",sector:"Usinagem",state:"Operando",responsible:"Lucas Mendes",qr:"PAT-004"}
+ ],
+ plans:[
+  {id:1,title:"Corrigir equipamento danificado antes da prática",what:"Reparar equipamento da prática",why:"Evitar interrupção e risco operacional",where:"Usinagem",when:"2026-09-28",who:"Ana Paula Silva",how:"Inspecionar, substituir componente e testar",cost:850,time:4,status:"Em andamento",g:5,u:5,t:4,evidence:[]},
+  {id:2,title:"Fixar adesivo de segurança na entrada",what:"Instalar sinalização",why:"Melhorar comunicação de segurança",where:"Entrada do recinto",when:"2026-09-30",who:"Lucas Mendes",how:"Limpar superfície e aplicar adesivo",cost:80,time:1,status:"Planejada",g:3,u:2,t:2,evidence:[]}
+ ],
+ photos:[], plant:null
+};
+function save(){localStorage.setItem(KEY,JSON.stringify(data));updateAll()}
+function toast(msg){let x=document.getElementById("toast");x.textContent=msg;x.classList.add("show");setTimeout(()=>x.classList.remove("show"),2500)}
+const titles={dashboard:"Visão geral",people:"Pessoas",equipment:"Equipamentos",plans:"Planos de ação",gut:"Priorização GUT",plants:"Plantas & fotos",statistics:"Estatísticas",reports:"Relatórios & saída de informação",help:"Central de ajuda",settings:"Acessibilidade"};
+function showView(id){
+ document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id===id));
+ document.querySelectorAll("[data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===id));
+ document.getElementById("pageTitle").textContent=titles[id];
+ window.scrollTo({top:0,behavior:"smooth"});
+ updateAll();
+}
+document.querySelectorAll("[data-view]").forEach(b=>b.addEventListener("click",()=>showView(b.dataset.view)));
+function openModal(title,body,foot){document.getElementById("modalTitle").textContent=title;document.getElementById("modalBody").innerHTML=body;document.getElementById("modalFoot").innerHTML=foot;document.getElementById("modal").classList.add("open");}
+function closeModal(){document.getElementById("modal").classList.remove("open")}
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function openPerson(id=null){
+ const p=data.people.find(x=>x.id===id)||{};
+ openModal(id?"Editar pessoa":"Cadastrar pessoa",`<div class="form-grid">
+ <div class="field"><label>Nome completo</label><input id="fName" value="${esc(p.name)}" required></div>
+ <div class="field"><label>Função</label><input id="fRole" value="${esc(p.role)}"></div>
+ <div class="field"><label>Setor</label><input id="fSector" value="${esc(p.sector)}"></div>
+ <div class="field"><label>Contato</label><input id="fContact" value="${esc(p.contact)}"></div></div>`,
+ `<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="savePerson(${id||0})">Salvar</button>`);
+}
+function savePerson(id){let obj={id:id||Date.now(),name:document.getElementById("fName").value.trim(),role:document.getElementById("fRole").value.trim(),sector:document.getElementById("fSector").value.trim(),contact:document.getElementById("fContact").value.trim()};if(!obj.name){toast("Informe o nome.");return}if(id)data.people=data.people.map(x=>x.id===id?obj:x);else data.people.push(obj);save();closeModal();toast("Pessoa salva.")}
+function renderPeople(){let q=(document.getElementById("peopleSearch")?.value||"").toLowerCase();let rows=data.people.filter(p=>[p.name,p.role,p.sector,p.contact].join(" ").toLowerCase().includes(q));document.getElementById("peopleTable").innerHTML=rows.length?rows.map(p=>`<tr><td><strong>${esc(p.name)}</strong></td><td>${esc(p.role)}</td><td>${esc(p.sector)}</td><td>${esc(p.contact)}</td><td><div class="actions"><button class="btn small" onclick="openPerson(${p.id})">Editar</button><button class="btn small danger" onclick="removeItem('people',${p.id})">Excluir</button></div></td></tr>`).join(""):`<tr><td colspan="5" class="empty">Nenhuma pessoa encontrada.</td></tr>`}
+function openEquipment(id=null){
+ const e=data.equipment.find(x=>x.id===id)||{};
+ const people=data.people.map(p=>`<option ${p.name===e.responsible?"selected":""}>${esc(p.name)}</option>`).join("");
+ openModal(id?"Editar equipamento":"Cadastrar equipamento",`<div class="form-grid">
+ <div class="field"><label>Nome / máquina</label><input id="eName" value="${esc(e.name)}"></div>
+ <div class="field"><label>Patrimônio</label><input id="eAsset" value="${esc(e.asset)}"></div>
+ <div class="field"><label>Setor / local</label><input id="eSector" value="${esc(e.sector)}"></div>
+ <div class="field"><label>Estado</label><select id="eState"><option>Operando</option><option ${e.state==="Manutenção"?"selected":""}>Manutenção</option><option>Parado</option><option>Bloqueado</option></select></div>
+ <div class="field"><label>Responsável</label><select id="eResp"><option value="">—</option>${people}</select></div>
+ <div class="field"><label>Código QR</label><input id="eQR" value="${esc(e.qr||e.asset)}"></div></div>`,
+ `<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveEquipment(${id||0})">Salvar</button>`);
+}
+function saveEquipment(id){let obj={id:id||Date.now(),name:document.getElementById("eName").value.trim(),asset:document.getElementById("eAsset").value.trim(),sector:document.getElementById("eSector").value.trim(),state:document.getElementById("eState").value,responsible:document.getElementById("eResp").value,qr:document.getElementById("eQR").value.trim()};if(!obj.name){toast("Informe o equipamento.");return}if(id)data.equipment=data.equipment.map(x=>x.id===id?obj:x);else data.equipment.push(obj);save();closeModal();toast("Equipamento salvo.")}
+function renderEquipment(){let q=(document.getElementById("equipSearch")?.value||"").toLowerCase();let rows=data.equipment.filter(e=>[e.name,e.asset,e.sector,e.state,e.responsible].join(" ").toLowerCase().includes(q));document.getElementById("equipmentTable").innerHTML=rows.length?rows.map(e=>`<tr><td><strong>${esc(e.name)}</strong></td><td>${esc(e.asset)}</td><td>${esc(e.sector)}</td><td><span class="badge ${e.state==="Operando"?"low":e.state==="Manutenção"?"medium":"critical"}">${esc(e.state)}</span></td><td>${esc(e.responsible||"—")}</td><td><div class="actions"><button class="btn small" onclick="openEquipment(${e.id})">Editar</button><button class="btn small ghost" onclick="selectEquipment('${esc(e.qr||e.asset)}')">Detalhes</button><button class="btn small danger" onclick="removeItem('equipment',${e.id})">Excluir</button></div></td></tr>`).join(""):`<tr><td colspan="6" class="empty">Nenhum equipamento encontrado.</td></tr>`}
+function quickPlan(){openPlan()}
+function openPlan(id=null){
+ const p=data.plans.find(x=>x.id===id)||{};let people=data.people.map(x=>`<option ${x.name===p.who?"selected":""}>${esc(x.name)}</option>`).join("");
+ openModal(id?"Editar plano 5W2H":"Criar plano 5W2H",`<div class="form-grid">
+ <div class="field full"><label>Nome da ação / problema</label><input id="pTitle" value="${esc(p.title)}" placeholder="Ex.: Reparar equipamento danificado"></div>
+ <div class="field"><label>What — O que será feito?</label><textarea id="pWhat">${esc(p.what)}</textarea></div>
+ <div class="field"><label>Why — Por quê?</label><textarea id="pWhy">${esc(p.why)}</textarea></div>
+ <div class="field"><label>Where — Onde?</label><input id="pWhere" value="${esc(p.where)}"></div>
+ <div class="field"><label>When — Quando?</label><input id="pWhen" type="date" value="${esc(p.when)}"></div>
+ <div class="field"><label>Who — Quem fará?</label><select id="pWho"><option value="">Selecionar</option>${people}</select></div>
+ <div class="field"><label>How — Como será feito?</label><textarea id="pHow">${esc(p.how)}</textarea></div>
+ <div class="field"><label>How much — Custo estimado (R$)</label><input id="pCost" type="number" min="0" step="0.01" value="${p.cost||0}"></div>
+ <div class="field"><label>Tempo estimado (horas)</label><input id="pTime" type="number" min="0" step=".5" value="${p.time||0}"></div>
+ <div class="field"><label>Status</label><select id="pStatus"><option>Planejada</option><option>Em andamento</option><option>Concluída</option><option>Bloqueada</option></select></div>
+ <div class="field"><label>Gravidade (1–5)</label><input id="pG" type="number" min="1" max="5" value="${p.g||3}"></div>
+ <div class="field"><label>Urgência (1–5)</label><input id="pU" type="number" min="1" max="5" value="${p.u||3}"></div>
+ <div class="field"><label>Tendência (1–5)</label><input id="pT" type="number" min="1" max="5" value="${p.t||3}"></div>
+ </div>`,
+ `<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="savePlan(${id||0})">Salvar plano</button>`);
+ document.getElementById("pStatus").value=p.status||"Planejada";
+}
+function savePlan(id){
+ let obj={id:id||Date.now(),title:document.getElementById("pTitle").value.trim(),what:document.getElementById("pWhat").value,why:document.getElementById("pWhy").value,where:document.getElementById("pWhere").value,when:document.getElementById("pWhen").value,who:document.getElementById("pWho").value,how:document.getElementById("pHow").value,cost:+document.getElementById("pCost").value||0,time:+document.getElementById("pTime").value||0,status:document.getElementById("pStatus").value,g:+document.getElementById("pG").value||1,u:+document.getElementById("pU").value||1,t:+document.getElementById("pT").value||1,evidence:(data.plans.find(x=>x.id===id)||{}).evidence||[]};
+ if(!obj.title){toast("Informe o nome da ação.");return}if(id)data.plans=data.plans.map(x=>x.id===id?obj:x);else data.plans.push(obj);save();closeModal();toast("Plano salvo com sucesso.")}
+function gutVal(p){return (+p.g||1)*(+p.u||1)*(+p.t||1)}
+function gutClass(n){return n>=81?"critical":n>=51?"high":n>=21?"medium":"low"}
+function gutName(n){return n>=81?"Crítica":n>=51?"Alta":n>=21?"Média":"Baixa"}
+function renderPlans(){let q=(document.getElementById("planSearch")?.value||"").toLowerCase(),f=document.getElementById("planFilter")?.value||"";let ps=data.plans.filter(p=>[p.title,p.where,p.who,p.what].join(" ").toLowerCase().includes(q)&&(f? p.status===f:true));let cols={"Planejada":[],"Em andamento":[],"Concluída":[],"Bloqueada":[]};ps.forEach(p=>(cols[p.status]??= []).push(p));document.getElementById("kanban").innerHTML=Object.entries(cols).map(([status,list])=>`<div class="column"><h3>${status} <span class="badge blue">${list.length}</span></h3>${list.length?list.map(p=>`<article class="task"><strong>${esc(p.title)}</strong><p class="muted" style="margin:7px 0">${esc(p.where||"Sem local")} · ${esc(p.who||"Sem responsável")}</p><span class="badge ${gutClass(gutVal(p))}">GUT ${gutVal(p)}</span><span class="badge blue">${esc(p.when||"Sem data")}</span><div class="progress" style="margin-top:10px"><span style="width:${status==="Concluída"?100:status==="Em andamento"?55:status==="Bloqueada"?20:10}%"></span></div><div class="actions" style="margin-top:10px"><button class="btn small" onclick="openPlan(${p.id})">Editar</button><button class="btn small" onclick="attachEvidence(${p.id})">Foto</button><button class="btn small danger" onclick="removeItem('plans',${p.id})">Excluir</button></div></article>`).join(""):`<div class="empty">Sem ações</div>`}</div>`).join("")}
+function renderGUT(){let ps=[...data.plans].sort((a,b)=>gutVal(b)-gutVal(a));document.getElementById("gutTable").innerHTML=ps.length?ps.map(p=>`<tr><td><strong>${esc(p.title)}</strong></td><td>${p.g}</td><td>${p.u}</td><td>${p.t}</td><td><strong>${gutVal(p)}</strong></td><td><span class="badge ${gutClass(gutVal(p))}">${gutName(gutVal(p))}</span></td></tr>`).join(""):`<tr><td colspan="6" class="empty">Cadastre um plano para aparecer no ranking.</td></tr>`}
+function calcGUT(){let n=(+document.getElementById("g").value||1)*(+document.getElementById("u").value||1)*(+document.getElementById("t").value||1);document.getElementById("gutScore").textContent=n;let b=document.getElementById("gutLevel");b.textContent=gutName(n);b.className="badge "+gutClass(n)}
+function addPhotos(ev){[...ev.target.files].forEach(file=>{let r=new FileReader();r.onload=()=>{data.photos.unshift({id:Date.now()+Math.random(),src:r.result,name:file.name,date:new Date().toLocaleDateString("pt-BR")});save();renderPhotos()};r.readAsDataURL(file)});ev.target.value=""}
+function renderPhotos(){document.getElementById("photoGrid").innerHTML=data.photos.length?data.photos.map(p=>`<figure class="photo"><img src="${p.src}" alt="Evidência ${esc(p.name)}"><figcaption>${esc(p.name)} · ${p.date}<br><button class="btn small danger" style="margin-top:6px" onclick="removePhoto('${p.id}')">Excluir</button></figcaption></figure>`).join(""):`<div class="empty" style="grid-column:1/-1">Nenhuma foto adicionada.</div>`}
+function removePhoto(id){data.photos=data.photos.filter(x=>String(x.id)!==String(id));save();renderPhotos()}
+function showPlant(ev){let f=ev.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{data.plant={src:r.result,name:f.name};save();renderPlant()};r.readAsDataURL(f)}
+function renderPlant(){document.getElementById("plantArea").innerHTML=data.plant?`<img src="${data.plant.src}" alt="Planta do projeto ${esc(data.plant.name)}" style="max-width:100%;max-height:500px;border-radius:14px"><p class="muted">${esc(data.plant.name)}</p><button class="btn danger small" onclick="data.plant=null;save();renderPlant()">Remover planta</button>`:`Nenhuma planta adicionada. Você pode enviar uma imagem da planta/layout do espaço.`}
+function attachEvidence(id){let inp=document.createElement("input");inp.type="file";inp.accept="image/*";inp.onchange=()=>{let f=inp.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{let p=data.plans.find(x=>x.id===id);p.evidence=p.evidence||[];p.evidence.push(r.result);data.photos.unshift({id:Date.now()+Math.random(),src:r.result,name:"Evidência — "+p.title,date:new Date().toLocaleDateString("pt-BR")});save();toast("Evidência anexada.")};r.readAsDataURL(f)};inp.click()}
+function renderStats(){
+ let statuses=["Planejada","Em andamento","Concluída","Bloqueada"], counts=statuses.map(s=>data.plans.filter(p=>p.status===s).length);
+ let max=Math.max(1,...counts);document.getElementById("statusChart").innerHTML=counts.map((n,i)=>`<div class="bar" style="height:${Math.max(8,n/max*90)}%"><em>${n}</em><span>${statuses[i].slice(0,6)}</span></div>`).join("");
+ let pri=["Baixa","Média","Alta","Crítica"], pc=pri.map(x=>data.plans.filter(p=>gutName(gutVal(p))===x).length), pm=Math.max(1,...pc);document.getElementById("priorityChart").innerHTML=pc.map((n,i)=>`<div class="bar" style="height:${Math.max(8,n/pm*90)}%"><em>${n}</em><span>${pri[i]}</span></div>`).join("");
+ let total=data.plans.length, done=data.plans.filter(p=>p.status==="Concluída").length, avg=total?data.plans.reduce((a,p)=>a+(+p.time||0),0)/total:0,cost=data.plans.reduce((a,p)=>a+(+p.cost||0),0),ev=data.plans.reduce((a,p)=>a+(p.evidence?.length||0),0)+data.photos.length;
+ document.getElementById("avgTime").textContent=avg.toFixed(1)+" h";document.getElementById("totalCost").textContent=cost.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});document.getElementById("completion").textContent=(total?done/total*100:0).toFixed(0)+"%";document.getElementById("evidenceCount").textContent=ev;
+ document.getElementById("kpiList").innerHTML=`<p><span class="badge blue">MTTR informado</span> ${avg.toFixed(1)} h</p><p><span class="badge low">Concluídas</span> ${done} de ${total}</p><p><span class="badge high">Custo previsto</span> ${cost.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}</p>`;
+}
+function renderDashboard(){document.getElementById("statEquip").textContent=data.equipment.length;document.getElementById("statOpen").textContent=data.plans.filter(p=>p.status!=="Concluída").length;document.getElementById("statHigh").textContent=data.plans.filter(p=>gutVal(p)>=51).length;document.getElementById("statPeople").textContent=data.people.length;let r=[...data.plans].sort((a,b)=>b.id-a.id).slice(0,4);document.getElementById("recentActions").innerHTML=r.length?r.map(p=>`<p><span class="badge ${gutClass(gutVal(p))}">${gutName(gutVal(p))}</span> <strong>${esc(p.title)}</strong><br><small class="muted">${esc(p.status)} · ${esc(p.when||"sem data")}</small></p>`).join(""):`<div class="empty">Nenhuma ação registrada.</div>`;let st=["Planejada","Em andamento","Concluída","Bloqueada"],co=st.map(s=>data.plans.filter(p=>p.status===s).length),m=Math.max(1,...co);document.getElementById("miniChart").innerHTML=co.map((n,i)=>`<div class="bar" style="height:${Math.max(8,n/m*90)}%"><em>${n}</em><span>${["Plan.","Andam.","Concl.","Bloq."][i]}</span></div>`).join("")}
+function renderPhotosAndPlant(){renderPhotos();renderPlant()}
+function updateAll(){renderDashboard();renderPeople();renderEquipment();renderPlans();renderGUT();renderPhotosAndPlant();renderStats();if(document.getElementById("executiveSummary"))renderReports()}
+function removeItem(type,id){if(!confirm("Excluir este registro?"))return;data[type]=data[type].filter(x=>x.id!==id);save();toast("Registro excluído.")}
+function openQR(){document.getElementById("qrModal").classList.add("open");startQR()}
+function selectEquipment(code){let e=data.equipment.find(x=>String(x.qr||x.asset)===String(code));if(!e){toast("Nenhum equipamento encontrado para: "+code);return}showView("equipment");setTimeout(()=>{let q=document.getElementById("equipSearch");q.value=e.asset||e.qr;renderEquipment()},50);toast("Equipamento localizado.")}
+function exportData(){let blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="alpha-tech-backup.json";a.click();URL.revokeObjectURL(a.href);toast("Backup exportado.")}
+function importData(ev){let f=ev.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!x.people||!x.equipment||!x.plans)throw Error();data=x;save();toast("Backup restaurado.")}catch(e){toast("Arquivo de backup inválido.")}};r.readAsText(f)}
+function clearData(){if(confirm("Isso apagará os dados salvos neste navegador. Continuar?")){localStorage.removeItem(KEY);location.reload()}}
+function toggleContrast(){document.body.classList.toggle("high-contrast");localStorage.setItem("contrast",document.body.classList.contains("high-contrast"))}
+function toggleLarge(){document.body.classList.toggle("large-text");localStorage.setItem("large",document.body.classList.contains("large-text"))}
+if(localStorage.getItem("contrast")==="true")document.body.classList.add("high-contrast");if(localStorage.getItem("large")==="true")document.body.classList.add("large-text");
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeModal();closeQR()}});
+document.getElementById("modal").addEventListener("click",e=>{if(e.target.id==="modal")closeModal()});document.getElementById("qrModal").addEventListener("click",e=>{if(e.target.id==="qrModal")closeQR()});
+updateAll();
+
+/* ===== ALPHA TECH 2.0 — autenticação, ajuda, relatórios e QR ===== */
+const AUTH_KEY="alphaTechUserV2";
+let authUser=JSON.parse(localStorage.getItem(AUTH_KEY)||"null");
+
+function setAuthMode(mode){
+  const reg=mode==="register";
+  document.getElementById("registerForm").style.display=reg?"block":"none";
+  document.getElementById("loginForm").style.display=reg?"none":"block";
+  document.getElementById("tabRegister").classList.toggle("active",reg);
+  document.getElementById("tabLogin").classList.toggle("active",!reg);
+  document.getElementById("authHeading").textContent=reg?"Crie seu acesso":"Bem-vindo de volta";
+  document.getElementById("authSub").textContent=reg?"Faça seu cadastro inicial para entrar no ambiente.":"Entre com os dados cadastrados neste navegador.";
+  clearAuthError();
+}
+function authError(msg){let e=document.getElementById("authError");e.textContent=msg;e.classList.add("show")}
+function clearAuthError(){document.getElementById("authError").classList.remove("show")}
+function registerUser(){
+  const name=document.getElementById("regName").value.trim(),email=document.getElementById("regEmail").value.trim().toLowerCase(),
+        role=document.getElementById("regRole").value.trim(),company=document.getElementById("regCompany").value.trim(),
+        password=document.getElementById("regPassword").value,terms=document.getElementById("regTerms").checked;
+  if(name.length<3)return authError("Digite seu nome completo.");
+  if(!email.includes("@"))return authError("Digite um e-mail válido.");
+  if(password.length<6)return authError("A senha precisa ter pelo menos 6 caracteres.");
+  if(!terms)return authError("Marque a opção de concordância para continuar.");
+  authUser={name,email,role,company,password,createdAt:new Date().toISOString()};
+  localStorage.setItem(AUTH_KEY,JSON.stringify(authUser));
+  enterApp();
+}
+function loginUser(){
+  const email=document.getElementById("loginEmail").value.trim().toLowerCase(),password=document.getElementById("loginPassword").value;
+  const saved=JSON.parse(localStorage.getItem(AUTH_KEY)||"null");
+  if(!saved)return authError("Nenhum cadastro encontrado neste navegador. Faça o primeiro acesso.");
+  if(saved.email!==email||saved.password!==password)return authError("E-mail ou senha incorretos.");
+  authUser=saved;enterApp();
+}
+function enterApp(){
+  document.getElementById("authScreen").style.display="none";
+  updateProfile();
+  toast("Bem-vindo ao Alpha Tech, "+authUser.name.split(" ")[0]+"!");
+}
+function updateProfile(){
+  if(!authUser)return;
+  const first=authUser.name.split(" ")[0],initials=authUser.name.split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase();
+  document.getElementById("profileName").textContent=first;
+  document.getElementById("profileAvatar").textContent=initials||"AT";
+  document.getElementById("profileChip").title=[authUser.name,authUser.role,authUser.company].filter(Boolean).join(" • ");
+}
+function logout(){
+  authUser=null;document.getElementById("authScreen").style.display="flex";setAuthMode("login");
+}
+function togglePassword(id,btn){const i=document.getElementById(id);i.type=i.type==="password"?"text":"password";btn.textContent=i.type==="password"?"◉":"◉";}
+function startTour(){
+  showView("dashboard");
+  setTimeout(()=>toast("Tour: comece pelo cadastro de equipamentos → crie uma ação 5W2H → priorize com GUT → anexe evidência."),300);
+}
+function toggleFAQ(btn){btn.parentElement.classList.toggle("open");const s=btn.querySelector("span");if(s)s.textContent=btn.parentElement.classList.contains("open")?"−":"＋";}
+function openSupport(){
+  openModal("Pedir ajuda",`<div class="form-grid">
+   <div class="field"><label>Assunto</label><select id="helpTopic"><option>Não sei usar uma função</option><option>Problema com equipamento</option><option>Problema com plano 5W2H</option><option>Dúvida sobre GUT</option><option>QR Code não funcionou</option><option>Outro</option></select></div>
+   <div class="field"><label>Urgência</label><select id="helpUrgency"><option>Baixa</option><option>Média</option><option>Alta</option><option>Crítica</option></select></div>
+   <div class="field full"><label>Descreva o que aconteceu</label><textarea id="helpMessage" placeholder="Explique sua dúvida ou problema…"></textarea></div>
+   <div class="field"><label>Seu contato</label><input id="helpContact" value="${esc(authUser?.email||"")}"></div>
+  </div>`,
+  `<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="sendSupport()">Registrar pedido</button>`);
+}
+function sendSupport(){
+  const msg=document.getElementById("helpMessage").value.trim();if(!msg)return toast("Descreva sua dúvida antes de enviar.");
+  const requests=JSON.parse(localStorage.getItem("alphaTechHelp")||"[]");
+  requests.push({id:Date.now(),user:authUser?.email||"",topic:document.getElementById("helpTopic").value,urgency:document.getElementById("helpUrgency").value,message:msg,createdAt:new Date().toISOString(),status:"Aberto"});
+  localStorage.setItem("alphaTechHelp",JSON.stringify(requests));closeModal();toast("Pedido de ajuda registrado.");
+}
+function csvEscape(v){return '"'+String(v??"").replace(/"/g,'""')+'"'}
+function downloadBlob(name,text,type="text/csv;charset=utf-8"){const b=new Blob(["\ufeff"+text],{type}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+function exportPlansCSV(){
+ const rows=[["Ação","O que","Por quê","Onde","Quando","Quem","Como","Custo","Horas","Status","G","U","T","GUT","Prioridade"]];
+ data.plans.forEach(p=>rows.push([p.title,p.what,p.why,p.where,p.when,p.who,p.how,p.cost,p.time,p.status,p.g,p.u,p.t,gutVal(p),gutName(gutVal(p))]));
+ downloadBlob("alpha-tech-planos.csv",rows.map(r=>r.map(csvEscape).join(";")).join("\n"));toast("Relatório de ações exportado.");
+}
+function exportEquipmentCSV(){
+ const rows=[["Equipamento","Patrimônio","Setor","Estado","Responsável","QR"]];
+ data.equipment.forEach(e=>rows.push([e.name,e.asset,e.sector,e.state,e.responsible,e.qr||e.asset]));
+ downloadBlob("alpha-tech-equipamentos.csv",rows.map(r=>r.map(csvEscape).join(";")).join("\n"));toast("Inventário exportado.");
+}
+function renderReports(){
+ const total=data.plans.length,done=data.plans.filter(p=>p.status==="Concluída").length,blocked=data.plans.filter(p=>p.status==="Bloqueada").length,
+ high=data.plans.filter(p=>gutVal(p)>=51).length,cost=data.plans.reduce((a,p)=>a+(+p.cost||0),0);
+ document.getElementById("executiveSummary").innerHTML=`<strong>${total}</strong> ações registradas; <strong>${done}</strong> concluídas; <strong>${blocked}</strong> bloqueadas; <strong>${high}</strong> com GUT alto/crítico; custo previsto de <strong>${cost.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}</strong>.`;
+}
+
+/* QR scanner using jsQR CDN with a camera-frame fallback. */
+let qrStream=null,qrLoop=null,qrLibPromise=null;
+function loadQRLibrary(){
+ if(window.jsQR)return Promise.resolve(true);
+ if(qrLibPromise)return qrLibPromise;
+ qrLibPromise=new Promise((resolve,reject)=>{
+   const s=document.createElement("script");s.src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js";
+   s.onload=()=>resolve(true);s.onerror=()=>reject(new Error("QR library failed"));document.head.appendChild(s);
+ });
+ return qrLibPromise;
+}
+async function startQR(){
+ const v=document.getElementById("qrVideo"),canvas=document.getElementById("qrCanvas"),status=document.getElementById("qrStatus");
+ if(qrLoop)cancelAnimationFrame(qrLoop);
+ if(qrStream)qrStream.getTracks().forEach(t=>t.stop());
+ try{
+   status.textContent="Carregando leitor QR…";await loadQRLibrary();
+   if(!navigator.mediaDevices?.getUserMedia)throw new Error("camera");
+   qrStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"},width:{ideal:1280},height:{ideal:720}},audio:false});
+   v.srcObject=qrStream;await v.play();status.textContent="Aponte a câmera para o QR Code…";
+   const ctx=canvas.getContext("2d",{willReadFrequently:true});
+   const scan=()=>{
+     if(v.readyState>=2&&v.videoWidth){
+       canvas.width=v.videoWidth;canvas.height=v.videoHeight;ctx.drawImage(v,0,0,canvas.width,canvas.height);
+       const image=ctx.getImageData(0,0,canvas.width,canvas.height),code=window.jsQR(image.data,image.width,image.height,{inversionAttempts:"attemptBoth"});
+       if(code?.data){handleQR(code.data);return;}
+     }
+     qrLoop=requestAnimationFrame(scan);
+   };scan();
+ }catch(e){
+   status.textContent="Câmera indisponível. Permita o acesso à câmera ou use a busca manual.";
+ }
+}
+function closeQR(){
+ document.getElementById("qrModal").classList.remove("open");
+ if(qrLoop)cancelAnimationFrame(qrLoop);qrLoop=null;
+ if(qrStream)qrStream.getTracks().forEach(t=>t.stop());qrStream=null;
+}
+function handleQR(code){if(!code){toast("Informe um código.");return}closeQR();selectEquipment(code)}
+function selectEquipment(code){
+ const normalized=String(code).trim(),e=data.equipment.find(x=>[x.qr,x.asset,x.id,String(x.name).toLowerCase()].map(v=>String(v??"").trim().toLowerCase()).includes(normalized.toLowerCase()));
+ if(!e){toast("QR lido: "+normalized+" — equipamento não cadastrado.");showView("equipment");return}
+ showView("equipment");setTimeout(()=>{const q=document.getElementById("equipSearch");q.value=e.asset||e.qr;renderEquipment()},60);toast("✓ "+e.name+" localizado.");
+}
+
+/* profile settings in accessibility view */
+function openProfileEditor(){
+ openModal("Meu perfil",`<div class="form-grid">
+ <div class="field full"><label>Nome</label><input id="meName" value="${esc(authUser?.name||"")}"></div>
+ <div class="field"><label>Função</label><input id="meRole" value="${esc(authUser?.role||"")}"></div>
+ <div class="field"><label>Empresa / projeto</label><input id="meCompany" value="${esc(authUser?.company||"")}"></div>
+ <div class="field full"><label>E-mail</label><input id="meEmail" type="email" value="${esc(authUser?.email||"")}"></div>
+ </div>`,`<button class="btn" onclick="closeModal()">Cancelar</button><button class="btn primary" onclick="saveProfile()">Salvar perfil</button>`);
+}
+function saveProfile(){
+ authUser={...authUser,name:document.getElementById("meName").value.trim(),role:document.getElementById("meRole").value.trim(),company:document.getElementById("meCompany").value.trim(),email:document.getElementById("meEmail").value.trim().toLowerCase()};
+ localStorage.setItem(AUTH_KEY,JSON.stringify(authUser));updateProfile();closeModal();toast("Perfil atualizado.");
+}
+
+/* protect app until registration/login */
+function bootAuth(){if(authUser){document.getElementById("authScreen").style.display="none";updateProfile();}else{document.getElementById("authScreen").style.display="flex";setAuthMode("register");}}
+document.addEventListener("DOMContentLoaded",()=>{bootAuth();renderReports();});
+
+</script>
+</body>
+</html>
